@@ -27,6 +27,10 @@
         <activity 
             android:name="com.shengjianjia.coolweather.activity.WeatherActivity"></activity>
 
+        <service android:name="com.shengjianjia.coolweather.service.AutoUpdateService"></service>
+        
+        <receiver android:name="com.shengjianjia.coolweather.receiver.AutoUpdateReceiver"></receiver>
+        
     </application>
 
 </manifest>

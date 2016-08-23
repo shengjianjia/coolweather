@@ -17,6 +17,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.shengjianjia.coolweather.R;
+import com.shengjianjia.coolweather.service.AutoUpdateService;
 import com.shengjianjia.coolweather.util.HttpCallbackListener;
 import com.shengjianjia.coolweather.util.HttpUtil;
 import com.shengjianjia.coolweather.util.Utility;
@@ -153,6 +154,9 @@ public class WeatherActivity extends Activity implements OnClickListener{
 		currentDateText.setText(prefs.getString("current_date", ""));
 		weatherInfoLayout.setVisibility(View.VISIBLE);
 		cityNameText.setVisibility(View.VISIBLE);
+		//激活定时更新天气任务服务
+		Intent intent = new Intent(this, AutoUpdateService.class);
+		startService(intent);
 	}
 	
 	@Override
@@ -167,10 +171,10 @@ public class WeatherActivity extends Activity implements OnClickListener{
 			case R.id.refresh_weather:
 				publishText.setText("同步中...");
 				SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-				String weatherName = prefs.getString("weather_code", ""); 
-				if(!TextUtils.isEmpty(weatherName)){
+				String cityName = prefs.getString("city_name", ""); 
+				if(!TextUtils.isEmpty(cityName)){
 					try {
-						queryWeatherInfo(weatherName);
+						queryWeatherInfo(cityName);
 					} catch (UnsupportedEncodingException e) {
 						e.printStackTrace();
 					}
