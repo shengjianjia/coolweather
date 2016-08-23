@@ -102,7 +102,7 @@ public class Utility {
 	 * @param context
 	 * @param response
 	 */
-	public static void handleWeatherResponse(Context context, String response){
+	public static void handleWeatherResponse(Context context, String response, String cityName){
 		try {
 //			JSONObject jsonObject = new JSONObject(response);
 //			JSONObject weatherInfo = jsonObject.getJSONObject("weatherinfo");
@@ -122,8 +122,7 @@ public class Utility {
 			String temp2 = data.getString("wind");
 			String weatherDesp = data.getString("weather");
 			String publishTime = data.getString("date");
-			Log.e("AAA", "temp1:" + temp1 + "  temp2" + temp2 + "  weatherDesp: " + weatherDesp + " publishTime:" + publishTime);
-			saveWeatherInfo(context, null, null, temp1, temp2, weatherDesp, publishTime);
+			saveWeatherInfo(context, cityName, null, temp1, temp2, weatherDesp, publishTime);
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}

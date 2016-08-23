@@ -4,12 +4,15 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.Window;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -18,7 +21,7 @@ import com.shengjianjia.coolweather.util.HttpCallbackListener;
 import com.shengjianjia.coolweather.util.HttpUtil;
 import com.shengjianjia.coolweather.util.Utility;
 
-public class WeatherActivity extends Activity {
+public class WeatherActivity extends Activity implements OnClickListener{
 	
 	private LinearLayout weatherInfoLayout;
 	private TextView cityNameText;//显示城市名
@@ -27,6 +30,9 @@ public class WeatherActivity extends Activity {
 	private TextView temp1Text;//显示气温1
 	private TextView temp2Text;//显示气温2
 	private TextView currentDateText;//显示当前日期
+	
+	private Button switchCity;//切换城市按钮
+	private Button refreshWeather;//更新天气按钮
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +64,11 @@ public class WeatherActivity extends Activity {
 			//没有县级代号时就直接显示本地天气
 			showWeather();
 		}
+		
+		switchCity = (Button)findViewById(R.id.switch_city);
+		refreshWeather = (Button)findViewById(R.id.refresh_weather);
+		switchCity.setOnClickListener(this);
+		refreshWeather.setOnClickListener(this);
 	}
 
 	/**
@@ -68,7 +79,7 @@ public class WeatherActivity extends Activity {
 	private void queryWeatherCode(String countryCode) throws UnsupportedEncodingException {
 //		String address = "http://www.weather.com.cn/data/list3/city" + countryCode + ".xml";
 		String address = "http://api.map.baidu.com/telematics/v3/weather?location=" + URLEncoder.encode(countryCode,"utf-8") + "&output=json&ak=FK9mkfdQsloEngodbFl4FeY3";
-		queryFromServer(address, "countryCode");
+		queryFromServer(address, "countryCode", countryCode);
 	}
 
 	/**
@@ -79,7 +90,7 @@ public class WeatherActivity extends Activity {
 	private void queryWeatherInfo(String weatherCode) throws UnsupportedEncodingException{
 //		String address = "http://www.weather.com.cn/data/cityinfo/" + weatherCode + ".html";
 		String address = "http://api.map.baidu.com/telematics/v3/weather?location=" + URLEncoder.encode(weatherCode,"utf-8") + "&output=json&ak=FK9mkfdQsloEngodbFl4FeY3";
-		queryFromServer(address, "weatherCode");
+		queryFromServer(address, "weatherCode", weatherCode);
 	}
 	
 	/**
@@ -87,7 +98,7 @@ public class WeatherActivity extends Activity {
 	 * @param address
 	 * @param type
 	 */
-	private void queryFromServer(final String address, final String type){
+	private void queryFromServer(final String address, final String type, final String cityName){
 		HttpUtil.sendHttpRequest(address, new HttpCallbackListener() {
 			@Override
 			public void onFinish(final String response){
@@ -107,7 +118,7 @@ public class WeatherActivity extends Activity {
 //					}
 //				}else if("weatherCode".equals(type)){
 					//处理服务器返回的天气信息
-					Utility.handleWeatherResponse(WeatherActivity.this, response);
+					Utility.handleWeatherResponse(WeatherActivity.this, response, cityName);
 					runOnUiThread(new Runnable() {
 						@Override
 						public void run() {
@@ -142,5 +153,31 @@ public class WeatherActivity extends Activity {
 		currentDateText.setText(prefs.getString("current_date", ""));
 		weatherInfoLayout.setVisibility(View.VISIBLE);
 		cityNameText.setVisibility(View.VISIBLE);
+	}
+	
+	@Override
+	public void onClick(View v) {
+		switch (v.getId()) {
+			case R.id.switch_city:
+				Intent intent = new Intent(this, ChooseAreaActivity.class);
+				intent.putExtra("from_weather_activity", true);
+				startActivity(intent);
+				finish();
+				break;
+			case R.id.refresh_weather:
+				publishText.setText("同步中...");
+				SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+				String weatherName = prefs.getString("weather_code", ""); 
+				if(!TextUtils.isEmpty(weatherName)){
+					try {
+						queryWeatherInfo(weatherName);
+					} catch (UnsupportedEncodingException e) {
+						e.printStackTrace();
+					}
+				}
+				break;
+			default:
+				break;
+		}
 	}
 }

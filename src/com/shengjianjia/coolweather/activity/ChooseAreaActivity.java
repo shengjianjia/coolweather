@@ -28,7 +28,7 @@ import com.shengjianjia.coolweather.util.HttpCallbackListener;
 import com.shengjianjia.coolweather.util.HttpUtil;
 import com.shengjianjia.coolweather.util.Utility;
 
-public class ChooseAreaActivity extends Activity {
+public class ChooseAreaActivity extends Activity{
 
 	public static final int LEVEL_PROVINCE = 0;
 	public static final int LEVEL_CITY = 1;
@@ -50,14 +50,19 @@ public class ChooseAreaActivity extends Activity {
 	
 	private int currentLevel;//当前选中的级别
 	
+	private boolean isFromWeatherActivity;//是否从WeatherActivity中跳转过来
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.choose_area);
 		
+		isFromWeatherActivity = getIntent().getBooleanExtra("from_weather_activity", false);
+		
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-		if(prefs.getBoolean("city_selected", false)){
+		//已经选择了城市切不是从WeatherActivity跳转过来，才会直接跳转到WeatherActivity
+		if(prefs.getBoolean("city_selected", false) && isFromWeatherActivity){
 			Intent intent = new Intent(this, WeatherActivity.class);
 			startActivity(intent);
 			finish();
@@ -241,7 +246,12 @@ public class ChooseAreaActivity extends Activity {
 		}else if(currentLevel == LEVEL_CITY){
 			queryProvinces();
 		}else{
+			if(isFromWeatherActivity){
+				Intent intent = new Intent(this, WeatherActivity.class);
+				startActivity(intent);
+			}
 			finish();
 		}
 	}
+	
 }
